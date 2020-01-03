@@ -133,3 +133,5 @@ dmypy.json
 /logs/
 /__pycache__/
 
+*.xml
+*.iml
