@@ -1,4 +1,4 @@
-import numpy, pandas, random, util
+import numpy, pandas, random, util, state
 
 class QLearning:
     def __init__(self, actions, learningRate = 0.01, discount = 0.9, explorationRate = 0.9, numTraining=100):
@@ -9,8 +9,6 @@ class QLearning:
         self.numTraining = numTraining
         self.qLearningTable = pandas.DataFrame(columns = self.actions, dtype = numpy.float64)
         self.values = util.Counter()
-        
-
     
     def getQValue(self, state, action):
         if self.values[(state, action)] == None:
@@ -45,11 +43,12 @@ class QLearning:
     
 class approximateQlearning(QLearning):
     def __init__(self):
-        self.weights = util.Counter()
-        self.features = util.Counter()
+        self.weights = state.weight()
+        self.features = state.feature()
 
     def getQValue(self, state, action):
         qValue = 0
+        self.features.determineFeatureValue(state)
         for feature in self.features:
           qValue += self.features[feature] * self.weights[feature]
         return qValue
