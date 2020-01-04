@@ -136,6 +136,7 @@ class DeepQNetwork:
             action = np.argmax(actions_value)
         else:
             action = np.random.randint(0, self.n_actions)
+        #print(action)
         return action
 
     def learn(self):
