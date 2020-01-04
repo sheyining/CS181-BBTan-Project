@@ -1,0 +1,11 @@
+@font-face {
+    font-family: SquareFont;
+    src: url(../fonts/Square.ttf);
+}
+
+*{
+    padding: 0px;
+    margin: 0px;
+    font-family: "SquareFont","Arial","SansSerif";
+    -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+}
