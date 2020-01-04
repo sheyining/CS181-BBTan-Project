@@ -8,9 +8,7 @@ async def main():
     # await page.screenshot({'path': 'example.png'})
     QL = q_learning.approximateQlearning()
     for episode in range(300):
-        
-        #This observation is to initiate, maybe there is a better way to code QAQ
-        #Note that this obseration is not the first one, but the one after the game begins!!!
+        #await page.evaluate('game.ballsLeftPosX = 100') 
         observation =  await page.evaluate('''() => {
                 return {
                     tileMap: game.tileMap,startX: game.ballsLeftPosX, gameLevel: game.level
