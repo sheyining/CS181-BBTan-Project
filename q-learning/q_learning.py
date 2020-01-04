@@ -1,8 +1,8 @@
 import numpy, pandas, random, util, state
 
 class QLearning:
-    def __init__(self, actions, learningRate = 0.01, discount = 0.9, explorationRate = 0.9, numTraining=100):
-        self.actions = actions #a list
+    def __init__(self, learningRate = 0.01, discount = 0.9, explorationRate = 0.9, numTraining=100):
+        self.actions = ['N', 'S', 'E', 'W'] #a list???
         self.alpha = learningRate
         self.gamma = discount
         self.epsilon = explorationRate
@@ -43,6 +43,7 @@ class QLearning:
     
 class approximateQlearning(QLearning):
     def __init__(self):
+        QLearning.__init__(self)
         self.weights = state.weight()
         self.features = state.feature()
 
@@ -52,6 +53,23 @@ class approximateQlearning(QLearning):
         for feature in self.features:
           qValue += self.features[feature] * self.weights[feature]
         return qValue
+
+    def computeActionFromQValues(self, state):
+        maxValue = float('-Inf')
+        bestAction = None
+        for action in self.actions:
+            if self.getQValue(state, action) > maxValue:
+                maxValue = self.getQValue(state, action)
+                bestAction = action
+        return bestAction
+
+    def getAction(self, state):
+        prob = self.epsilon
+        if util.flipCoin(prob):
+            action = random.choice(self.actions)
+        else:
+            action = self.computeActionFromQValues(state)
+        return action    
 
     def update(self, state, action, nextState, reward):
         difference = reward + self.gamma * self.computeValueFromQValues(nextState) - self.getQValue(state, action)

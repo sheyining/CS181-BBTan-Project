@@ -5,6 +5,11 @@ class state:
         self.level = level
         self.xAxis = xAxis
 
+    def assignData(self, observation):
+        self.tileMatrix = observation['tileMap']
+        self.xAxis = observation['startX']
+        self.level = observation['gameLevel']
+
 
 class feature(dict):
     def __init__(self):
@@ -22,11 +27,13 @@ class feature(dict):
     
     def determineFeatureValue(self, state):
         self['startX'] = state.xAxis
+        print(state.xAxis)
         for i in range(len(state.tileMatrix)):
             for j in range(len(state.tileMatrix[0])):
                 self['ij'] = state.tileMatrix[i][j] * state.level
 
 class weight(feature):
     def __init__(self):
+        feature.__init__(self)
         for feature in self:
             self[feature] = 1
