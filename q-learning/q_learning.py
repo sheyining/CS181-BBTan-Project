@@ -46,13 +46,12 @@ class approximateQlearning(QLearning):
         QLearning.__init__(self)
         self.weights = state.weight()
         self.features = state.feature()
-        print(self.weights, self.features)
 
     def getQValue(self, state, action):
         qValue = 0
         self.features.determineFeatureValue(state)
+        print(self.weights)
         for i in self.features:
-            print(i,":",self.features[i])
             qValue += self.features[i] * self.weights[i]
         return qValue
 
@@ -78,7 +77,6 @@ class approximateQlearning(QLearning):
     def update(self, state, action, nextState, reward):
         difference = reward + self.gamma * self.computeValueFromQValues(nextState) - self.getQValue(state, action)
         for feature in self.features:
-            print(feature,":",self.features[feature])
             self.weights[feature] += self.alpha * difference * self.features[feature]
 
     def computeValueFromQValues(self, state):

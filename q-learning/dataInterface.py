@@ -2,9 +2,9 @@ import asyncio, q_learning, state
 from pyppeteer import launch
 
 async def main():
-    browser = await launch()
+    browser = await launch({'headless':False})
     page = await browser.newPage()
-    await page.goto('D:/Documents/CoderYJazz/cs181 project/CS181-BBTan-Project/BBTan-master 2/index.html')
+    await page.goto('D:/Documents/CoderYJazz/cs181 project/CS181-BBTan-Project/BBTan/index.html')
 
     QL = q_learning.approximateQlearning()
     for episode in range(300):
@@ -15,12 +15,12 @@ async def main():
                 }
             }''')
         newState = state.state(observation['tileMap'], observation['gameLevel'], observation['startX'])
-        a = state.feature()
+        
         while True:
             currentState = newState
             action = QL.getAction(currentState)
-            await page.evaluate("game.angle = action")
-            
+            #await page.evaluate("SHOOTINGANGLE = ", action)
+            await page.click('#mainCanvas')
             observation =  await page.evaluate('''() => {
                 return {
                     tileMap: game.tileMap,startX: game.ballsLeftPosX, gameLevel: game.level, gameStatus: game.gameStatus
