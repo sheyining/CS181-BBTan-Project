@@ -20,6 +20,8 @@ async def main():
             currentState = newState
             action = QL.getAction(currentState)
             #await page.evaluate("SHOOTINGANGLE = ", action)
+            await page.evaluate('shootingAngle = %d'% (action))
+            #await page.click('#mainCanvas')
             await page.click('#mainCanvas')
             observation =  await page.evaluate('''() => {
                 return {
