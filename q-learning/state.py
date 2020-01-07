@@ -13,7 +13,7 @@ class state:
 
 class feature(dict):
     def __init__(self):
-        self = {
+        dict.__init__(self,{
         '00':0, '01':0, '02':0, '03':0, '04':0, '05':0, '06':0,
         '10':0, '11':0, '12':0, '13':0, '14':0, '15':0, '16':0,
         '20':0, '21':0, '22':0, '23':0, '24':0, '25':0, '26':0,
@@ -23,18 +23,18 @@ class feature(dict):
         '60':0, '61':0, '62':0, '63':0, '64':0, '65':0, '66':0,
         '70':0, '71':0, '72':0, '73':0, '74':0, '75':0, '76':0,
         '80':0, '81':0, '82':0, '83':0, '84':0, '85':0, '86':0,
-        'startX':0}
+        'startX':0})
     
     def determineFeatureValue(self, state):
         self['startX'] = state.xAxis
-        print(state.xAxis)
         for i in range(len(state.tileMatrix)):
             for j in range(len(state.tileMatrix[0])):
-                self['ij'] = state.tileMatrix[i][j] * state.level
+                index = str(i)+str(j)
+                self[index] = state.tileMatrix[i][j] * state.level
 
 class weight(dict):
     def __init__(self):
-        self = {
+        dict.__init__(self,{
         '00':1, '01':1, '02':1, '03':1, '04':1, '05':1, '06':1,
         '10':1, '11':1, '12':1, '13':1, '14':1, '15':1, '16':1,
         '20':1, '21':1, '22':1, '23':1, '24':1, '25':1, '26':1,
@@ -44,6 +44,8 @@ class weight(dict):
         '60':1, '61':1, '62':1, '63':1, '64':1, '65':1, '66':1,
         '70':1, '71':1, '72':1, '73':1, '74':1, '75':1, '76':1,
         '80':1, '81':1, '82':1, '83':1, '84':1, '85':1, '86':1,
-        'startX':1}
+        'startX':1})
+
+    
         # for feature in self:
         #     self[feature] = 1

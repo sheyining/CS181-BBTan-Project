@@ -1,3 +1,4 @@
+const SHOOTINGANGLE= Math.random() * Math.PI;
 const TOP_HEIGHT = 60;
 const BOT_HEIGHT = 114;
 const BOT_BG_HEIGHT = 61;

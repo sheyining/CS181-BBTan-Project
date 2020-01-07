@@ -11,6 +11,7 @@ class Game {
     this.botScoreBoard = new BotScoreBoard(this.ctx);
     this.level = 1;
     this.colorChange = 0;
+    this.angle = SHOOTINGANGLE;
     //Setting the time for game----------------------------------------------------------------------------------------
     this.gameTime = TOTAL_TIME;
     this.gameTimeSec = '00';

@@ -2,7 +2,7 @@ import numpy, pandas, random, util, state
 
 class QLearning:
     def __init__(self, learningRate = 0.01, discount = 0.9, explorationRate = 0.9, numTraining=100):
-        self.actions = ['N', 'S', 'E', 'W'] #a list???
+        self.actions = [1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8] #a list???
         self.alpha = learningRate
         self.gamma = discount
         self.epsilon = explorationRate
@@ -46,20 +46,24 @@ class approximateQlearning(QLearning):
         QLearning.__init__(self)
         self.weights = state.weight()
         self.features = state.feature()
+        print(self.weights, self.features)
 
     def getQValue(self, state, action):
         qValue = 0
         self.features.determineFeatureValue(state)
-        for feature in self.features:
-          qValue += self.features[feature] * self.weights[feature]
+        for i in self.features:
+            print(i,":",self.features[i])
+            qValue += self.features[i] * self.weights[i]
         return qValue
 
+    #return action with highest Q-Value
     def computeActionFromQValues(self, state):
         maxValue = float('-Inf')
         bestAction = None
         for action in self.actions:
-            if self.getQValue(state, action) > maxValue:
-                maxValue = self.getQValue(state, action)
+            value = self.getQValue(state, action)
+            if value > maxValue:
+                maxValue = value
                 bestAction = action
         return bestAction
 
@@ -74,7 +78,8 @@ class approximateQlearning(QLearning):
     def update(self, state, action, nextState, reward):
         difference = reward + self.gamma * self.computeValueFromQValues(nextState) - self.getQValue(state, action)
         for feature in self.features:
-          self.weights[feature] += self.alpha * difference * self.features[feature]
+            print(feature,":",self.features[feature])
+            self.weights[feature] += self.alpha * difference * self.features[feature]
 
     def computeValueFromQValues(self, state):
         maxValue = float('-Inf')
