@@ -24,7 +24,7 @@ BATCH_SIZE = 32
 GAMMA = 0.99
 OBSERVE_TIME = 500
 ENV_NAME = 'Breakout-v0'
-EPISODE = 100000
+EPISODE = 8000
 STEP = 1500
 TEST = 10
 REPLACE_TARGET_ITER = 300
@@ -93,9 +93,12 @@ class DQN():
         self.time_step = 0
         self.keep_prob = 0.5
 
+        
         # self.session = tf.InteractiveSession()
         self.session = tf.InteractiveSession()
         self.create_network()
+        self.path = "D:/Documents/CoderYJazz/cs181 project/CS181-BBTan-Project/DQN_version/breakout_sample/save_next.ckpt"
+        self.saver = tf.train.Saver()
         # self.create_training_method()
         self.observe_time = 0
 
@@ -110,6 +113,10 @@ class DQN():
 
 
         self.session.run(tf.global_variables_initializer())
+        if os.path.exists(self.path + '.meta'):
+            print("\nload checkpoint ...\n")
+            self.saver.restore(self.session,self.path)
+            # print(self.session.run())
 
     def create_network(self):
 
@@ -146,7 +153,7 @@ class DQN():
             h_conv3 = tf.nn.relu(tf.nn.conv2d(h_conv2, W3, strides=[1, 1, 1, 1], padding='SAME') + b3)
             # h_conv2_flat = tf.reshape( h_conv2, [ -1, 11 * 11 * 32 ] )
             h_pool2_flat = tf.reshape(h_conv3, [-1, 1600])
-            print(h_pool2_flat.shape)
+
             h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
             h_fc1_drop = tf.nn.dropout(h_fc1,self.keep_prob)
 
@@ -170,7 +177,7 @@ class DQN():
 
         Q_action = tf.reduce_sum(tf.multiply(self.Q_value, self.action_input), reduction_indices=1)
         self.cost = tf.reduce_mean(tf.square(self.y_input - Q_action))
-        self.optimizer = tf.train.AdamOptimizer(1e-4).minimize(self.cost)
+        self.optimizer = tf.train.AdamOptimizer(1e-6).minimize(self.cost)
 
     # def create_training_method(self):
     #
@@ -183,7 +190,7 @@ class DQN():
     def train_network(self):
         if self.time_step % REPLACE_TARGET_ITER == 0:
             self.session.run(self.target_replace_op)
-            print('\ntarget_params_replaced\n')
+            print('/ntarget_params_replaced/n')
 
         self.time_step += 1
 
@@ -272,6 +279,10 @@ class DQN():
         bias = tf.constant(0.01, shape=shape)
         return tf.Variable(bias)
 
+    def save_net(self):
+        self.saver.save(self.session,self.path)
+        print("Save to path:", self.path)
+
 
 def main():
     env = gym.make(ENV_NAME)
@@ -320,6 +331,9 @@ def main():
             print ('Decade:', episode / 10, 'Total Reward in this Decade is:', total_reward_decade)
             print ('-------------')
             total_reward_decade = 0
+        if(episode%1000==0):
+            agent.save_net()
+    agent.save_net()
 
 
 

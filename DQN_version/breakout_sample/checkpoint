@@ -1,0 +1,2 @@
+model_checkpoint_path: "D:/Documents/CoderYJazz/cs181 project/CS181-BBTan-Project/DQN_version/breakout_sample/save_next.ckpt"
+all_model_checkpoint_paths: "D:/Documents/CoderYJazz/cs181 project/CS181-BBTan-Project/DQN_version/breakout_sample/save_next.ckpt"
