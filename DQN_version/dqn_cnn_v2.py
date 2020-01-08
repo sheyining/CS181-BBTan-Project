@@ -7,6 +7,7 @@ import tensorflow as tf
 import numpy as np
 import random
 from collections import deque
+import pickle
 
 
 
@@ -24,7 +25,7 @@ BATCH_SIZE = 32
 GAMMA = 0.99
 OBSERVE_TIME = 500
 ENV_NAME = 'Breakout-v0'
-EPISODE = 8000
+EPISODE = 3
 STEP = 1500
 TEST = 10
 REPLACE_TARGET_ITER = 300
@@ -97,10 +98,15 @@ class DQN():
         # self.session = tf.InteractiveSession()
         self.session = tf.InteractiveSession()
         self.create_network()
-        self.path = "D:/Documents/CoderYJazz/cs181 project/CS181-BBTan-Project/DQN_version/breakout_sample/save_next.ckpt"
+        self.path = "/breakout_sample/save_next.ckpt"       
         self.saver = tf.train.Saver()
         # self.create_training_method()
         self.observe_time = 0
+
+        self.memory_path = os.getcwd() + "/breakout_sample/memory_replay.pk"
+        if os.path.exists(self.memory_path):
+            print("\nload replay buffer ...\n")
+            self.replay_buffer = pickle.load(open(self.memory_path, 'rb'))
 
         self.merged = tf.summary.merge_all()
         self.summary_writer = tf.summary.FileWriter('/path/to/logs', self.session.graph)
@@ -108,7 +114,7 @@ class DQN():
         t_params = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='target_net')
         e_params = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='eval_net')
 
-        with tf.variable_scope('hard_replacement'):
+        with tf.variable_scope('hard_replacement'+'.pickle'):
             self.target_replace_op = [tf.assign(t, e) for t, e in zip(t_params, e_params)]
 
 
@@ -117,6 +123,7 @@ class DQN():
             print("\nload checkpoint ...\n")
             self.saver.restore(self.session,self.path)
             # print(self.session.run())
+        
 
     def create_network(self):
 
@@ -128,17 +135,28 @@ class DQN():
         self.y_input = tf.placeholder(tf.float32, [None])
         # self.keep_prob = tf.placeholder(tf.float32)
 
-        W1 = self.get_weights([8, 8, 4, 32])
-        b1 = self.get_bias([32])
-        W2 = self.get_weights([4, 4, 32, 64])
-        b2 = self.get_bias([64])
-        W3 = self.get_weights([3, 3, 64, 64])
-        b3 = self.get_bias([64])
-        W_fc1 = self.get_weights([1600, 512])
-        b_fc1 = self.get_bias([512])
-        W_fc2 = self.get_weights([512, self.action_dim])
-        b_fc2 = self.get_bias([self.action_dim])
+        # W1 = self.get_weights([8, 8, 4, 32])
+        # b1 = self.get_bias([32])
+        # W2 = self.get_weights([4, 4, 32, 64])
+        # b2 = self.get_bias([64])
+        # W3 = self.get_weights([3, 3, 64, 64])
+        # b3 = self.get_bias([64])
+        # W_fc1 = self.get_weights([1600, 512])
+        # b_fc1 = self.get_bias([512])
+        # W_fc2 = self.get_weights([512, self.action_dim])
+        # b_fc2 = self.get_bias([self.action_dim])
         with tf.variable_scope('eval_net'):
+            W1 = self.get_weights([8, 8, 4, 32])
+            b1 = self.get_bias([32])
+            W2 = self.get_weights([4, 4, 32, 64])
+            b2 = self.get_bias([64])
+            W3 = self.get_weights([3, 3, 64, 64])
+            b3 = self.get_bias([64])
+            W_fc1 = self.get_weights([1600, 512])
+            b_fc1 = self.get_bias([512])
+            W_fc2 = self.get_weights([512, self.action_dim])
+            b_fc2 = self.get_bias([self.action_dim])
+
             h_conv1 = tf.nn.relu(tf.nn.conv2d(self.input_layer, W1, strides=[1, 4, 4, 1], padding='SAME') + b1)
             conv1 = tf.nn.max_pool(h_conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
@@ -163,29 +181,33 @@ class DQN():
             self.Q_value = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)    #predict
 
         with tf.variable_scope('target_net'):
-            t_h_conv1 = tf.nn.relu(tf.nn.conv2d(self.input_layer, W1, strides=[1, 4, 4, 1], padding='SAME') + b1)
+            t_W1 = self.get_weights([8, 8, 4, 32])
+            t_b1 = self.get_bias([32])
+            t_W2 = self.get_weights([4, 4, 32, 64])
+            t_b2 = self.get_bias([64])
+            t_W3 = self.get_weights([3, 3, 64, 64])
+            t_b3 = self.get_bias([64])
+            t_W_fc1 = self.get_weights([1600, 512])
+            t_b_fc1 = self.get_bias([512])
+            t_W_fc2 = self.get_weights([512, self.action_dim])
+            t_b_fc2 = self.get_bias([self.action_dim])
+
+            t_h_conv1 = tf.nn.relu(tf.nn.conv2d(self.input_layer, t_W1, strides=[1, 4, 4, 1], padding='SAME') + t_b1)
             t_conv1 = tf.nn.max_pool(t_h_conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-            t_h_conv2 = tf.nn.relu(tf.nn.conv2d(t_conv1, W2, strides=[1, 2, 2, 1], padding='SAME') + b2)
+            t_h_conv2 = tf.nn.relu(tf.nn.conv2d(t_conv1, t_W2, strides=[1, 2, 2, 1], padding='SAME') + t_b2)
             # t_conv2 = tf.nn.max_pool( t_h_conv2, ksize = [ 1, 2, 2, 1 ], strides= [ 1, 2, 2, 1 ], padding= 'SAME' )
-            t_h_conv3 = tf.nn.relu(tf.nn.conv2d(t_h_conv2, W3, strides=[1, 1, 1, 1], padding='SAME') + b3)
+            t_h_conv3 = tf.nn.relu(tf.nn.conv2d(t_h_conv2, t_W3, strides=[1, 1, 1, 1], padding='SAME') + t_b3)
             t_h_pool2_flat = tf.reshape(t_h_conv3, [-1, 1600])
-            t_h_fc1 = tf.nn.relu(tf.matmul(t_h_pool2_flat, W_fc1) + b_fc1)
+            t_h_fc1 = tf.nn.relu(tf.matmul(t_h_pool2_flat, t_W_fc1) + t_b_fc1)
             # t_h_fc1_drop = tf.nn.dropout(t_h_fc1,self.keep_prob)
 
-            self.t_Q_value = tf.nn.softmax(tf.matmul(t_h_fc1, W_fc2) + b_fc2)
+            self.t_Q_value = tf.nn.softmax(tf.matmul(t_h_fc1, t_W_fc2) + t_b_fc2)
 
         Q_action = tf.reduce_sum(tf.multiply(self.Q_value, self.action_input), reduction_indices=1)
         self.cost = tf.reduce_mean(tf.square(self.y_input - Q_action))
         self.optimizer = tf.train.AdamOptimizer(1e-6).minimize(self.cost)
 
-    # def create_training_method(self):
-    #
-    #   # if len(self.recent_history_queue) > 4:
-    #   #   sess = tf.Session()
-    #   #   print sess.run(self.Q_value)
-    #   # global_step = tf.Variable(0, name='global_step', trainable=True)
-    #   # self.optimizer = tf.train.AdamOptimizer( 0.001 ).minimize( self.cost )
 
     def train_network(self):
         if self.time_step % REPLACE_TARGET_ITER == 0:
@@ -280,8 +302,12 @@ class DQN():
         return tf.Variable(bias)
 
     def save_net(self):
-        self.saver.save(self.session,self.path)
-        print("Save to path:", self.path)
+        # self.saver.save(self.session,self.path)
+        print("Save network to path:", self.path)
+    
+    def save_memory(self):
+        pickle.dump(self.replay_buffer, open(self.memory_path, 'wb'))
+        print("Save memory to path:", self.memory_path)
 
 
 def main():
@@ -334,6 +360,7 @@ def main():
         if(episode%1000==0):
             agent.save_net()
     agent.save_net()
+    agent.save_memory()
 
 
 
