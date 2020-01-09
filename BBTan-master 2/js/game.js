@@ -35,7 +35,7 @@ class Game {
     this.ballsArray = [];
     this.ballsArray.push(new Ball(this.ctx,this));
     this.bbtanGameBot = new BbtanGameBot(this.ctx,this.ballsArray[0].x);
-    this.ballsLeftPosX = this.ballsArray[0].x;
+    this.ballsLeftPosX = this.ballsArray[0].x;    
     this.obstacles = [];
     this.animation = [];
     this.nextLevelCounter = 1;
@@ -64,6 +64,7 @@ class Game {
       [0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0]
     ];
+    this.shootingAngle = Math.PI/4;
   }
 
   setHighScore() {
@@ -729,22 +730,6 @@ function  draw() {
               obstacle.drawSquare(game.levelMap[i][j]);
               game.obstacles.push([obstacle, SQUARE]);
               break;
-            // case TRIANGLE_BOT_LEFT:
-            //   obstacle = new ObsTriangleBotLeft(game.ctx,i,j);
-            //   obstacle.drawTriangleBotLeft(game.levelMap[i][j]);
-            //   break;
-            // case TRIANGLE_BOT_RIGHT:
-            //   obstacle = new ObsTriangleBotRight(game.ctx,i,j);
-            //   obstacle.drawTriangleBotRight(game.levelMap[i][j]);
-            //   break;
-            // case TRIANGLE_TOP_LEFT:
-            //   obstacle = new ObsTriangleTopRight(game.ctx,i,j);
-            //   obstacle.drawTriangleTopRight(game.levelMap[i][j]);
-            //   break;
-            // case TRIANGLE_TOP_RIGHT:
-            //   obstacle = new ObsTriangleTopLeft(game.ctx,i,j);
-            //   obstacle.drawTriangleTopLeft(game.levelMap[i][j]);
-            //   break;
             case COIN:
               powerUp = new PowerUps(game.ctx, i, j, game.spriteSheet, 0); //type 0 for coin
               powerUp.drawCoin();
@@ -842,7 +827,7 @@ function shootBalls(game,evt) {
         game.shootStatus = true;
         game.dottedLine = [];
         for (let j = 0; j < game.ballsArray.length; j++) {
-          game.ballsArray[j] = setShootingAngle(game.canvas, evt, game.ballsArray[j], j, game);
+          game.ballsArray[j] = setShootingAngle(game.canvas, evt, game.ballsArray[j], j, game, game.shootingAngle);
           game.ballsArray[j].setOffSetX(j);
         }
       }
@@ -873,7 +858,7 @@ function checkClickOperation(game, evt) {
       game.gameSound.play('button');
     }
   }else if(game.gameStatus === 'startMenu') {
-    if(checkCoOrdinates(game.canvas,evt,game) === 'play'){
+    if(checkCoOrdinates(game.canvas,evt,game)){// === 'play'){
       game.reset();
       game.updateTileMap();
       game.gameSound.play('button');

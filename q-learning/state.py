@@ -13,7 +13,7 @@ class state:
 
 class weight(dict):
     def __init__(self):
-        dict.__init__(self,{'angleDiff1':1,'angleDiff2':1})
+        dict.__init__(self,{'angleDiff1':1,'angleDiff2':1, 'angleDiff3':1})
 
     
         # for feature in self:

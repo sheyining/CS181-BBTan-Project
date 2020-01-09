@@ -21,8 +21,8 @@ const BALL_RADIUS = 5;
 const BALL_VELOCITY = 8;
 const BALL_Y_DEAD = GAME_HEIGHT - BALL_RADIUS - 2 - BOT_HEIGHT;
 const BALL_GAP = 30;
-const BOT_VELOCITY = 10;
-const NEXT_LEVEL_SLIDE_SPEED = .025;
+const BOT_VELOCITY = 50;
+const NEXT_LEVEL_SLIDE_SPEED = 1;
 
 //Sprite-Sheet locations and dimensions-------------------------------------------------------------------------------
 const POWER_UPS_X = 210;
@@ -44,6 +44,7 @@ const BBTAN_BOT_ROT_GAME_HEIGHT = BOT_BG_HEIGHT * 2; // for canvas setting the h
 
 //Ball shooting angle limit and BBTAN BOT rotate---------------------------------------------------------------------
 const LOWEST_ANGLE = 0.26;
+const HIGHEST_ANGLE = Math.PI - 0.26;
 
 //TILE_MAPPING--------------------------------------------------------------------------------------------------------
 const BLANK = 0;

@@ -1,8 +1,8 @@
-import numpy, pandas, random, util, state, featureComputer
+import numpy, pandas, random, util, state, featureComputer, math
 
 class QLearning:
     def __init__(self, learningRate = 0.01, discount = 0.9, explorationRate = 0.9, numTraining=100):
-        self.actions = [util.action1, util.action2, util.action3, util.action4, util.action5] #a list of angle
+        self.actions = [(math.pi/2)*0.1*(i+2) for i in range(17)] #a list of angle
         self.alpha = learningRate
         self.gamma = discount
         self.epsilon = explorationRate
@@ -77,6 +77,7 @@ class approximateQlearning(QLearning):
         difference = reward + self.gamma * self.computeValueFromQValues(nextState) - self.getQValue(state, action)
         for feature in self.features:
             self.weights[feature] += self.alpha * difference * self.features[feature]
+        print(self.weights)
 
     def computeValueFromQValues(self, state):
         maxValue = float('-Inf')
