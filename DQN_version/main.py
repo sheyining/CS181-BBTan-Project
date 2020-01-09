@@ -1,54 +1,100 @@
-from cnn import Maze
-from dqn_modfied import DeepQNetwork
+import asyncio, q_learning, state, time
+from pyppeteer import launch
 
+async def main():
+    browser = await launch({'headless':False})
+    page = await browser.newPage()
+    await page.goto('D:/Documents/CoderYJazz/cs181 project/CS181-BBTan-Project/BBTan-master 2/index.html')
 
-def run_maze():
-    step = 0
+    QL = q_learning.approximateQlearning()
     for episode in range(300):
-        # initial observation
-        observation = env.reset()
+        await page.click('#mainCanvas')
 
+
+        #首先我们初始化一个newstate
+        observationini =  await page.evaluate('''() => {
+                return {
+                    tileMap: game.tileMap,startX: game.ballsLeftPosX, gameLevel: game.level, state: game.gameStatus, shootState: game.shootStatus
+                }
+            }''')
+        newState = state.state(observationini['tileMap'], observationini['gameLevel'], observationini['startX'])
+        status = observationini['state']
+        shootStatus = observationini['shootState']
+        i = 0
         while True:
-            # fresh env
-            env.render()
+            currentState = newState
+            action = QL.getAction(currentState)
+            print(action)
+            
+            while status != 'inGame' or shootStatus:
+                time.sleep(1)
+                checkState = await page.evaluate('''() => {
+                    return {
+                        gameStatus: game.gameStatus, shootState: game.shootStatus
+                    }
+                }''')
+                status = checkState['gameStatus']
+                shootStatus = checkState['shootState']
+            await page.evaluate('game.shootingAngle = %f'% (action))
+            check = await page.evaluate('''() => {
+                return {
+                    shootingAngle: game.shootingAngle
+                }
+            }''')
+            print(check['shootingAngle'])
+            
+            # time.sleep(1)
+            # await page.mouse.move(action[0],action[1])
+            await page.mouse.down()
+            await page.mouse.up()
+            i += 1
+            print(i)
 
-            # RL choose action based on observation
-            action = RL.choose_action(observation)
+            checkState = await page.evaluate('''() => {
+                    return {
+                        gameStatus: game.gameStatus, shootState: game.shootStatus
+                    }
+                }''')
+            status = checkState['gameStatus']
+            shootStatus = checkState['shootState']
+            
+            while status != 'inGame' or shootStatus:
+                time.sleep(1)
+                checkState = await page.evaluate('''() => {
+                    return {
+                        gameStatus: game.gameStatus, shootState: game.shootStatus
+                    }
+                }''')
+                status = checkState['gameStatus']
+                shootStatus = checkState['shootState']
+                if status == 'gameOver':
+                    break
 
-            # RL take action and get next observation and reward
-            observation_, reward, done = env.step(action)
 
-            RL.store_transition(observation, action, reward, observation_)
-
-            if (step > 200) and (step % 5 == 0):
-                RL.learn()
-
-            # swap observation
-            observation = observation_
-
-            # break while loop when end of this episode
-            if done:
+            observation =  await page.evaluate('''() => {
+                return {
+                    tileMap: game.tileMap,startX: game.ballsLeftPosX, gameLevel: game.level, gameStatus: game.gameStatus
+                }
+            }''')
+            if observation['gameStatus'] == 'gameOver':
                 break
-            step += 1
+                
+            else:
+                newState.assignData(observation)
+                QL.update(currentState, action, newState, i)
+        QL.update(currentState, action, newState, -10)
+        await page.mouse.move(500,100)
+        await page.mouse.down()
+        await page.mouse.up()
 
-    # end of game
-    print('game over')
-    env.destroy()
+    await browser.close()
+asyncio.get_event_loop().run_until_complete(main())
 
 
-if __name__ == "__main__":
-    # maze game
-    env = Maze()
-    # observation = env.reset()
-    # print(observation)
-    RL = DeepQNetwork(env.n_actions, env.n_features,
-                      learning_rate=0.01,
-                      reward_decay=0.9,
-                      e_greedy=0.9,
-                      replace_target_iter=200,
-                      memory_size=2000,
-                      # output_graph=True
-                      )
-    env.after(100, run_maze)
-    env.mainloop()
-    RL.plot_cost()
+# if __name__ == "__main__":
+#     QL = q_learning.approximateQlearning()
+
+
+
+
+
