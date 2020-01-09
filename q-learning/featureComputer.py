@@ -60,6 +60,12 @@ def getFeatures(state, action):
     else:
         feature['angleDiff3'] = 0
 
+    #feature4 倾向于角度低的发射
+    if shootingAngle < math.pi/6 or shootingAngle > math.pi*5/6:
+        feature['lowShooting'] = 10
+    else:
+        feature['lowShooting'] = 0
+
         
 
 

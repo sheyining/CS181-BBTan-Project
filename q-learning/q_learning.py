@@ -77,7 +77,8 @@ class approximateQlearning(QLearning):
         difference = reward + self.gamma * self.computeValueFromQValues(nextState) - self.getQValue(state, action)
         for feature in self.features:
             self.weights[feature] += self.alpha * difference * self.features[feature]
-        print(self.weights)
+        self.weights.nomalize()
+        #print(self.weights)
 
     def computeValueFromQValues(self, state):
         maxValue = float('-Inf')

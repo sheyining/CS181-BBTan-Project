@@ -5,12 +5,13 @@ async def main():
     browser = await launch({'headless':False})
     page = await browser.newPage()
     await page.goto('D:/Documents/CoderYJazz/cs181 project/CS181-BBTan-Project/BBTan-master 2/index.html')
-
+    listMiao = []
     QL = q_learning.approximateQlearning()
-    for episode in range(300):
+    totalScoreInTenEpisode = 0
+    for episode in range(100):
+        bestScoreEver = 0
         await page.click('#mainCanvas')
-
-
+        #print("We are now in episode %d"%(episode+1))
         #首先我们初始化一个newstate
         observationini =  await page.evaluate('''() => {
                 return {
@@ -24,7 +25,7 @@ async def main():
         while True:
             currentState = newState
             action = QL.getAction(currentState)
-            print(action)
+            #print(action)
             
             while status != 'inGame' or shootStatus:
                 time.sleep(1)
@@ -36,19 +37,11 @@ async def main():
                 status = checkState['gameStatus']
                 shootStatus = checkState['shootState']
             await page.evaluate('game.shootingAngle = %f'% (action))
-            check = await page.evaluate('''() => {
-                return {
-                    shootingAngle: game.shootingAngle
-                }
-            }''')
-            print(check['shootingAngle'])
             
-            # time.sleep(1)
-            # await page.mouse.move(action[0],action[1])
+            #shoot the balls
             await page.mouse.down()
             await page.mouse.up()
-            i += 1
-            print(i)
+            
 
             checkState = await page.evaluate('''() => {
                     return {
@@ -82,11 +75,22 @@ async def main():
             else:
                 newState.assignData(observation)
                 QL.update(currentState, action, newState, i)
+                i += 1
+               
+            
+        bestScoreEver = max(i, bestScoreEver)
+        totalScoreInTenEpisode += i
         QL.update(currentState, action, newState, -10)
-        await page.mouse.move(500,100)
-        await page.mouse.down()
-        await page.mouse.up()
 
+
+        if (episode+1)%10 == 0:
+            print("We have finished %d episodes"%(episode+1))
+            print("Our average score in this ten episodes is %f"%(totalScoreInTenEpisode/10))
+            listMiao += [totalScoreInTenEpisode/10]
+            print("Our best score ever is %d"%(bestScoreEver))
+            totalScoreInTenEpisode = 0
+
+    print(listMiao)
     await browser.close()
 asyncio.get_event_loop().run_until_complete(main())
 

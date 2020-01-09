@@ -13,7 +13,12 @@ class state:
 
 class weight(dict):
     def __init__(self):
-        dict.__init__(self,{'angleDiff1':1,'angleDiff2':1, 'angleDiff3':1})
+        dict.__init__(self,{'angleDiff1':1,'angleDiff2':1, 'angleDiff3':4, 'lowShooting':3})
+    
+    def nomalize(self):
+        sumOfValues = sum([v for v in self.values()])
+        for i in self.keys():
+            self[i] /= sumOfValues
 
     
         # for feature in self:

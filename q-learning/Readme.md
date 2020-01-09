@@ -12,3 +12,7 @@ Some other parameters such as learning rate, exploration rate and discount are a
 
 
 The origin file of BBTan game we are using is based on web programming language. 
+
+
+At first, I didn't realize that weight can gradually be calculated to a monster-large number, so to reduce this problem, I add a step to nomalize the weight.
+
