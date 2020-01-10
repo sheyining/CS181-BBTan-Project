@@ -25,7 +25,7 @@ BATCH_SIZE = 32
 GAMMA = 0.99
 OBSERVE_TIME = 500
 ENV_NAME = 'Breakout-v0'
-EPISODE = 3
+EPISODE = 10000
 STEP = 1500
 TEST = 10
 REPLACE_TARGET_ITER = 300
@@ -98,10 +98,18 @@ class DQN():
         # self.session = tf.InteractiveSession()
         self.session = tf.InteractiveSession()
         self.create_network()
-        self.path = "/breakout_sample/save_next.ckpt"       
+        self.path = os.getcwd() + "/breakout_sample/save_next.ckpt"       
         self.saver = tf.train.Saver()
         # self.create_training_method()
         self.observe_time = 0
+
+        self.items_save_path = os.getcwd() + "/breakout_sample/items.txt"
+        self.items_need_save = ['self.epsilon', 'self.time_step', 'self.observe_time']
+        self.items_dict = {}
+        for item in self.items_need_save:
+            self.items_dict[item] = eval(item)
+        if os.path.exists(self.items_save_path):
+            self.load_items()
 
         self.memory_path = os.getcwd() + "/breakout_sample/memory_replay.pk"
         if os.path.exists(self.memory_path):
@@ -119,9 +127,11 @@ class DQN():
 
 
         self.session.run(tf.global_variables_initializer())
+        # print(os.listdir(self.path[:-14]))
         if os.path.exists(self.path + '.meta'):
             print("\nload checkpoint ...\n")
             self.saver.restore(self.session,self.path)
+            print(self.path)
             # print(self.session.run())
         
 
@@ -302,12 +312,28 @@ class DQN():
         return tf.Variable(bias)
 
     def save_net(self):
-        # self.saver.save(self.session,self.path)
+        self.saver.save(self.session,self.path)
         print("Save network to path:", self.path)
     
     def save_memory(self):
         pickle.dump(self.replay_buffer, open(self.memory_path, 'wb'))
         print("Save memory to path:", self.memory_path)
+
+    def load_items(self):
+        print("\nload items ...\n")
+        f = open(self.items_save_path,'r')
+        a = f.read()
+        self.items_dict = eval(a)
+        f.close()
+        for item in self.items_need_save:
+            exec(item+'='+str(self.items_dict[item]))
+    
+    def save_items(self):
+        for item in self.items_need_save:
+            self.items_dict[item] = eval(item)
+        f = open(self.items_save_path,'w')
+        f.write(str(self.items_dict))
+        f.close()
 
 
 def main():
@@ -359,8 +385,11 @@ def main():
             total_reward_decade = 0
         if(episode%1000==0):
             agent.save_net()
+            agent.save_memory()
+            agent.save_items()
     agent.save_net()
     agent.save_memory()
+    agent.save_items()
 
 
 
